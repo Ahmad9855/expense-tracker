@@ -1,0 +1,4 @@
+body { background-color: #f8f9fa; }
+.form-narrow { max-width: 480px; }
+.progress { height: 1.25rem; }
+.table th { white-space: nowrap; }

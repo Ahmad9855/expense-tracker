@@ -1,89 +1,46 @@
-
 <?php
 require_once __DIR__ . '/../includes/db.php';
 
-$message = '';
+$expenses = $pdo->query(
+    'SELECT e.expense_date, e.description, c.name AS category, e.amount
+     FROM expenses e
+     JOIN categories c ON c.id = e.category_id
+     ORDER BY e.expense_date DESC, e.id DESC'
+)->fetchAll();
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $title = trim($_POST['title'] ?? '');
-    $amount = $_POST['amount'] ?? '';
-    $categoryId = $_POST['category_id'] ?? '';
-    $date = $_POST['expense_date'] ?? '';
-
-    if ($title === '' || !is_numeric($amount) || (float)$amount <= 0) {
-        $message = 'يرجى إدخال اسم ومبلغ صحيح للمصروف.';
-    } elseif (!filter_var($categoryId, FILTER_VALIDATE_INT) || $categoryId < 1) {
-        $message = 'يرجى اختيار فئة صحيحة.';
-    } else {
-        $check = $pdo->prepare('SELECT id FROM categories WHERE id = ?');
-        $check->execute([$categoryId]);
-
-        if (!$check->fetch()) {
-            $message = 'الفئة المختارة غير موجودة.';
-        } elseif (!DateTime::createFromFormat('!Y-m-d', $date) ||
-            DateTime::createFromFormat('!Y-m-d', $date)->format('Y-m-d') !== $date) {
-            $message = 'يرجى اختيار تاريخ صحيح.';
-        } else {
-            $stmt = $pdo->prepare(
-                'INSERT INTO expenses (title, amount, category_id, expense_date)
-                 VALUES (?, ?, ?, ?)'
-            );
-            $stmt->execute([$title, $amount, $categoryId, $date]);
-            header('Location: summary.php');
-            exit;
-        }
-    }
+$total = 0;
+foreach ($expenses as $row) {
+    $total += $row['amount'];
 }
 
-$categories = $pdo->query('SELECT id, name FROM categories ORDER BY name')
-                  ->fetchAll(PDO::FETCH_ASSOC);
+$pageTitle = 'Expenses';
+include __DIR__ . '/../includes/header.php';
 ?>
+<h1 class="mb-4">Expenses</h1>
 
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>إضافة مصروف</title>
-    <link rel="stylesheet" href="assets/style.css">
-</head>
-<body>
-    <main>
-        <h1>إضافة مصروف جديد</h1>
+<table class="table table-striped table-hover">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Description</th>
+            <th>Category</th>
+            <th class="text-end">Amount</th>
+        </tr>
+    </thead>
+    <tbody>
+    <?php if (!$expenses): ?>
+        <tr><td colspan="4" class="text-center text-muted">No expenses yet.</td></tr>
+    <?php endif; ?>
+    <?php foreach ($expenses as $row): ?>
+        <tr>
+            <td><?= htmlspecialchars($row['expense_date']) ?></td>
+            <td><?= htmlspecialchars($row['description']) ?></td>
+            <td><?= htmlspecialchars($row['category']) ?></td>
+            <td class="text-end"><?= number_format($row['amount'], 2) ?></td>
+        </tr>
+    <?php endforeach; ?>
+    </tbody>
+</table>
 
-        <?php if ($message !== ''): ?>
-            <p><?= htmlspecialchars($message, ENT_QUOTES, 'UTF-8') ?></p>
-        <?php endif; ?>
-
-        <form method="post">
-            <label for="title">اسم المصروف:</label>
-            <input id="title" name="title" type="text" required>
-
-            <label for="amount">المبلغ:</label>
-            <input id="amount" name="amount" type="number"
-                   min="0.01" step="0.01" required>
-
-            <label for="category_id">الفئة:</label>
-            <select id="category_id" name="category_id" required>
-                <option value="">اختاري الفئة</option>
-                <?php foreach ($categories as $category): ?>
-                    <option value="<?= (int)$category['id'] ?>">
-                        <?= htmlspecialchars($category['name'], ENT_QUOTES, 'UTF-8') ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>
-
-            <label for="expense_date">التاريخ:</label>
-            <input id="expense_date" name="expense_date"
-                   type="date" required
-                   value="<?= date('Y-m-d') ?>">
-
-            <button type="submit">حفظ المصروف</button>
-        </form>
-
-        <p><a href="summary.php">عرض ملخص المصروفات</a></p>
-        <script src="assets/js/main.js"></script>
-    </main>
-
-</body>
-</html>
+<p class="fs-5 fw-bold text-end">Total: <?= number_format($total, 2) ?></p>
+<?php include __DIR__ . '/../includes/footer.php'; ?>

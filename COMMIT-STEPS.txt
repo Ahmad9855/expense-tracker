@@ -1,0 +1,24 @@
+ROLE B - Backend
+
+Copy the files into your repo (keep the same folders), then one commit per file.
+Push db.php FIRST and tell C, because summary.php needs it.
+
+git pull
+git add config.example.php
+git commit -m "Add config.example.php with placeholder database settings"
+git add includes/db.php
+git commit -m "Add db.php with PDO connection"
+git push
+
+git add public/index.php
+git commit -m "Add index.php with expenses table and total"
+git add public/add_expense.php
+git commit -m "Add add_expense.php with form and PHP validation"
+git pull
+git push
+
+Local setup (NOT uploaded): cp config.example.php config.php
+Check that "git status" does not list config.php.
+Phase 2: add the Add Expense link in header.php (commit without push).
+Phase 3: the planned mistake goes in public/index.php.
+Phase 4: report/B.md

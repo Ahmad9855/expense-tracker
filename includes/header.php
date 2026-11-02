@@ -13,7 +13,7 @@
     <div class="container">
         <a class="navbar-brand" href="index.php">Expense Tracker</a>
         <div class="navbar-nav">
-            <!-- Page links are added in Phase 2 -->
+       <a class="nav-link" href="add_expense.php">Add Expense</a>
         </div>
     </div>
 </nav>

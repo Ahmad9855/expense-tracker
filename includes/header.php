@@ -12,8 +12,8 @@
 <nav class="navbar navbar-expand navbar-dark bg-dark mb-4">
     <div class="container">
         <a class="navbar-brand" href="index.php">Expense Tracker</a>
-        <div class="navbar-nav">
-            <!-- Page links are added in Phase 2 -->
+        <a class="nav-link" href="index.php">Expenses</a>
+           
         </div>
     </div>
 </nav>
